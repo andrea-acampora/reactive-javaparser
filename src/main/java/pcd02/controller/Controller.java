@@ -1,23 +1,36 @@
 package pcd02.controller;
 
+import io.reactivex.rxjava3.core.Scheduler;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+import io.reactivex.rxjava3.subjects.PublishSubject;
 import pcd02.lib.ProjectAnalyzer;
 import pcd02.lib.ProjectAnalyzerImpl;
 
-public class Controller implements Observer {
+public class Controller{
 
     private final ProjectAnalyzer lib;
+    private final PublishSubject<String> clickStream;
 
-    public Controller() {
+    public Controller(PublishSubject<String> clickStream) {
         this.lib = new ProjectAnalyzerImpl();
+        this.clickStream = clickStream;
+        this.clickStream.observeOn(Schedulers.computation())
+            .subscribe((res) -> {
+                if(res.equals("stop")){
+                    this.stop();
+                }else{
+                    this.start(res);
+                }
+        });
     }
 
-    @Override
-    public void notifyStart(final String path) {
-        this.lib.analyzeProject(path, "my-topic");
+    private void stop() {
+        System.out.println("STOP " + Thread.currentThread());
     }
 
-    @Override
-    public void notifyStop() {
-
+    private void start(String res) {
+        System.out.println("START " + Thread.currentThread());
+        lib.analyzeProject(res);
     }
+
 }

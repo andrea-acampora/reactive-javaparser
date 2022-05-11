@@ -1,5 +1,6 @@
 package pcd02.lib;
 
+import io.reactivex.rxjava3.core.Flowable;
 import pcd02.interfaces.*;
 
 import java.io.FileNotFoundException;
@@ -13,7 +14,7 @@ public interface ProjectAnalyzer {
 	 * @param srcClassPath The path of the class to parse.
 	 * @return a Future with the report of the class.
 	 */
-	Future<ClassReport> getClassReport(String srcClassPath) throws FileNotFoundException;
+	Flowable<ClassReport> getClassReport(String srcClassPath) throws FileNotFoundException;
 
 	/**
 	 * Async method to retrieve the report about a specific interface,
@@ -22,7 +23,7 @@ public interface ProjectAnalyzer {
 	 * @param srcInterfacePath The path of the interface to parse.
 	 * @return a Future with the report of the interface.
 	 */
-	Future<InterfaceReport> getInterfaceReport(String srcInterfacePath) throws FileNotFoundException;
+	Flowable<InterfaceReport> getInterfaceReport(String srcInterfacePath) throws FileNotFoundException;
 
 	/**
 	 * Async method to retrieve the report about a package,
@@ -31,7 +32,7 @@ public interface ProjectAnalyzer {
 	 * @param srcPackagePath The path of the package to parse.
 	 * @return a Future with the report of the all package.
 	 */
-	Future<PackageReport> getPackageReport(String srcPackagePath);
+	Flowable<PackageReport> getPackageReport(String srcPackagePath);
 
 	/**
 	 * Async method to retrieve the report about a project
@@ -40,7 +41,7 @@ public interface ProjectAnalyzer {
 	 * @param srcProjectFolderPath The path of the project to parse.
 	 * @return a Future with the report of the all project.
 	 */
-	Future<ProjectReport> getProjectReport(String srcProjectFolderPath);
+	Flowable<ProjectReport> getProjectReport(String srcProjectFolderPath);
 	
 	/**
 	 * Async function that analyze a project given the full path of the project folder,
@@ -49,5 +50,5 @@ public interface ProjectAnalyzer {
 	 * @param srcProjectFolderName The path of the folder of the project.
 	 * @param topicAddress The address of the topic.
 	 */
-	void analyzeProject(String srcProjectFolderName, String topicAddress);
+	void analyzeProject(String srcProjectFolderName);
 }

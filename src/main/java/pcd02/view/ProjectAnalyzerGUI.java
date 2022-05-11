@@ -1,6 +1,6 @@
 package pcd02.view;
 
-import pcd02.controller.Observer;
+import io.reactivex.rxjava3.subjects.PublishSubject;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -11,30 +11,29 @@ import javax.swing.*;
 public class ProjectAnalyzerGUI {
 
     private final VisualiserFrame frame;
+    private final PublishSubject<String> clickStream;
 
-    public ProjectAnalyzerGUI(){
-        this.frame = new VisualiserFrame(300, 300);
+    public ProjectAnalyzerGUI(PublishSubject<String> clickStream){
+        this.frame = new VisualiserFrame(300, 300, clickStream);
+        this.clickStream = clickStream;
     }
 
     public void start() {
         SwingUtilities.invokeLater(this.frame::start);
     }
 
-    public void addObserver(Observer observer) {
-        this.frame.addObserver(observer);
-    }
 
-
-    public class VisualiserFrame extends JFrame implements ActionListener {
+    public class VisualiserFrame extends JFrame{
 
         private final VisualiserPanel panel;
         private final JButton startButton;
         private final JButton stopButton;
         private final JFileChooser fileChooser;
-        private final List<Observer> observers;
+        private final PublishSubject<String> clickStream;
 
 
-        public VisualiserFrame(int w, int h) {
+        public VisualiserFrame(int w, int h, PublishSubject<String> clickStream) {
+            this.clickStream = clickStream;
             this.startButton = new JButton("start");
             this.stopButton = new JButton("stop");
             this.panel = new VisualiserPanel(w,h);
@@ -42,17 +41,23 @@ public class ProjectAnalyzerGUI {
             fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             fileChooser.setCurrentDirectory(new java.io.File(""));
             fileChooser.setDialogTitle("Select a project folder");
-
-            this.observers = new LinkedList<>();
-
             this.stopButton.setEnabled(false);
+
 
             setTitle("Project Analyzer");
             setSize(w,h);
             setResizable(false);
 
-            startButton.addActionListener(this);
-            stopButton.addActionListener(this);
+            startButton.addActionListener((ActionEvent ev) -> {
+                this.clickStream.onNext(this.fileChooser.getSelectedFile().getAbsolutePath());
+                this.stopButton.setEnabled(true);
+                this.startButton.setEnabled(false);
+            });
+            stopButton.addActionListener((ActionEvent ev) -> {
+                this.clickStream.onNext("stop");
+                this.stopButton.setEnabled(false);
+                this.startButton.setEnabled(true);
+            });
 
 
             JPanel controlPanel = new JPanel();
@@ -82,41 +87,23 @@ public class ProjectAnalyzerGUI {
                 this.setVisible(true);
             }
         }
-
-        @Override
-        public void actionPerformed(ActionEvent actionEvent) {
-            String cmd = actionEvent.getActionCommand();
-            if (cmd.equals("start")){
-                observers.forEach(obs -> obs.notifyStart(this.fileChooser.getSelectedFile().getAbsolutePath()));
-                this.stopButton.setEnabled(true);
-                this.startButton.setEnabled(false);
-            } else if (cmd.equals("stop")){
-                observers.forEach(Observer::notifyStop);
-                this.stopButton.setEnabled(false);
-                this.startButton.setEnabled(true);
-            }
-        }
-
-        public void addObserver(Observer observer) {
-            this.observers.add(observer);
-        }
     }
 
     public class VisualiserPanel extends JPanel {
 
-        private JPanel labelPanel;
-        private JPanel fieldPanel;
+        private final JPanel labelPanel;
+        private final JPanel fieldPanel;
 
-        private JLabel packages;
-        private JLabel classes;
-        private JLabel methods;
-        private JLabel fields;
+        private final JLabel packages;
+        private final JLabel classes;
+        private final JLabel methods;
+        private final JLabel fields;
 
-        private JLabel numPackages;
-        private JLabel numInterfaces;
-        private JLabel numClasses;
-        private JLabel numMethods;
-        private JLabel numFields;
+        private final JLabel numPackages;
+        private final JLabel numInterfaces;
+        private final JLabel numClasses;
+        private final JLabel numMethods;
+        private final JLabel numFields;
 
         public VisualiserPanel(int w, int h) {
             setSize(w, h);
