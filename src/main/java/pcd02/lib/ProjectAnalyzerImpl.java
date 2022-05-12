@@ -3,6 +3,7 @@ package pcd02.lib;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.SourceRoot;
+import io.reactivex.rxjava3.core.BackpressureStrategy;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Observer;
@@ -14,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.concurrent.Flow;
 
 public class ProjectAnalyzerImpl implements ProjectAnalyzer {
 
@@ -91,7 +93,7 @@ public class ProjectAnalyzerImpl implements ProjectAnalyzer {
     }
 
     @Override
-    public void analyzeProject(String srcProjectFolderName, Observer<ProjectElem> observer) {
+    public Flowable<ProjectElem> analyzeProject(String srcProjectFolderName) {
         SourceRoot sourceRoot = new SourceRoot(Paths.get(srcProjectFolderName));
         try {
             sourceRoot.tryToParse();
@@ -100,7 +102,7 @@ public class ProjectAnalyzerImpl implements ProjectAnalyzer {
         }
         List<CompilationUnit> compilationUnits = sourceRoot.getCompilationUnits();
         ProjectVisitor projectVisitor = new ProjectVisitor();
-        Observable<ProjectElem> source = Observable.create(emitter -> compilationUnits.forEach(cu ->  projectVisitor.visit(cu, emitter)));
-        source.subscribeWith(observer);
+        //source.subscribeWith(observer);
+        return Flowable.create(emitter -> compilationUnits.forEach(cu -> projectVisitor.visit(cu, emitter)), BackpressureStrategy.ERROR);
     }
 }

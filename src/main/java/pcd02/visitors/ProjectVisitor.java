@@ -15,7 +15,7 @@ import pcd02.reports.ProjectElemImpl;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ProjectVisitor extends VoidVisitorAdapter<ObservableEmitter<ProjectElem>> {
+public class ProjectVisitor extends VoidVisitorAdapter<FlowableEmitter<ProjectElem>> {
 
     private final Set<String> packages;
 
@@ -24,11 +24,11 @@ public class ProjectVisitor extends VoidVisitorAdapter<ObservableEmitter<Project
     }
 
 
-    public void visit(CompilationUnit cu,  ObservableEmitter<ProjectElem> emitter) {
+    public void visit(CompilationUnit cu,  FlowableEmitter<ProjectElem> emitter) {
         super.visit(cu, emitter);
     }
 
-    public void visit(PackageDeclaration pd, ObservableEmitter<ProjectElem> emitter) {
+    public void visit(PackageDeclaration pd, FlowableEmitter<ProjectElem> emitter) {
         super.visit(pd, emitter);
         if (packages.add(pd.getNameAsString())) {
             ProjectElem projectElem = new ProjectElemImpl();
@@ -37,7 +37,7 @@ public class ProjectVisitor extends VoidVisitorAdapter<ObservableEmitter<Project
         }
     }
 
-    public void visit(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, ObservableEmitter<ProjectElem> emitter) {
+    public void visit(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, FlowableEmitter<ProjectElem> emitter) {
             super.visit(classOrInterfaceDeclaration, emitter);
             ProjectElem projectElem = new ProjectElemImpl();
             if (classOrInterfaceDeclaration.isInterface()) {
@@ -48,14 +48,14 @@ public class ProjectVisitor extends VoidVisitorAdapter<ObservableEmitter<Project
             emitter.onNext(projectElem);
     }
 
-    public void visit(MethodDeclaration md, ObservableEmitter<ProjectElem> emitter) {
+    public void visit(MethodDeclaration md, FlowableEmitter<ProjectElem> emitter) {
             super.visit(md, emitter);
             ProjectElem projectElem = new ProjectElemImpl();
             projectElem.setType(ElemType.METHOD);
             emitter.onNext(projectElem);
     }
 
-    public void visit(FieldDeclaration fd, ObservableEmitter<ProjectElem> emitter) {
+    public void visit(FieldDeclaration fd, FlowableEmitter<ProjectElem> emitter) {
             super.visit(fd, emitter);
             ProjectElem projectElem = new ProjectElemImpl();
             projectElem.setType(ElemType.FIELD);

@@ -14,8 +14,9 @@ public class Controller {
 
     private final ProjectAnalyzer lib;
     private final PublishSubject<String> clickStream;
-    private final MyObserver observer;
+    //private final MyObserver observer;
     private final View view;
+    private Disposable disposable;
 
     public Controller(View view, PublishSubject<String> clickStream) {
         this.lib = new ProjectAnalyzerImpl();
@@ -29,14 +30,17 @@ public class Controller {
                     this.start(res);
                 }
         });
-        this.observer = new MyObserver(view);
     }
 
     private void stop() {
         System.out.println("STOP");
+        disposable.dispose();
     }
 
     private void start(String res) {
-        lib.analyzeProject(res, observer);
+        disposable = lib.analyzeProject(res).subscribeOn(Schedulers.computation()).subscribe(r -> {
+            view.notifyElement(r);
+            System.out.println("r = " + r);
+        });
     }
 }
