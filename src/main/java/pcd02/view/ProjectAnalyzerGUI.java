@@ -1,6 +1,7 @@
 package pcd02.view;
 
 import io.reactivex.rxjava3.subjects.PublishSubject;
+import pcd02.interfaces.ProjectElem;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -20,6 +21,26 @@ public class ProjectAnalyzerGUI {
 
     public void start() {
         SwingUtilities.invokeLater(this.frame::start);
+    }
+
+    public void notifyElement(ProjectElem projectElem) {
+        switch ( projectElem.getType()) {
+            case PACKAGE:
+                this.frame.panel.incrementPackages();
+                break;
+            case INTERFACE:
+                this.frame.panel.incrementInterfaces();
+                break;
+            case CLASS:
+                this.frame.panel.incrementClasses();
+                break;
+            case METHOD:
+                this.frame.panel.incrementMethods();
+                break;
+            case FIELD:
+                this.frame.panel.incrementFields();
+                break;
+        }
     }
 
 

@@ -5,6 +5,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.SourceRoot;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Observer;
 import pcd02.interfaces.*;
 import pcd02.reports.*;
 import pcd02.visitors.*;
@@ -90,7 +91,7 @@ public class ProjectAnalyzerImpl implements ProjectAnalyzer {
     }
 
     @Override
-    public void analyzeProject(String srcProjectFolderName) {
+    public void analyzeProject(String srcProjectFolderName, Observer<ProjectElem> observer) {
         SourceRoot sourceRoot = new SourceRoot(Paths.get(srcProjectFolderName));
         try {
             sourceRoot.tryToParse();
@@ -99,7 +100,7 @@ public class ProjectAnalyzerImpl implements ProjectAnalyzer {
         }
         List<CompilationUnit> compilationUnits = sourceRoot.getCompilationUnits();
         ProjectVisitor projectVisitor = new ProjectVisitor();
-        Observable<ProjectElem> source = Observable.create(emitter -> compilationUnits.forEach(cu -> projectVisitor.visit(cu, emitter)));
-        source.subscribe(element -> System.out.println("Project element: " + element.getType()));
+        Observable<ProjectElem> source = Observable.create(emitter -> compilationUnits.forEach(cu ->  projectVisitor.visit(cu, emitter)));
+        source.subscribeWith(observer);
     }
 }

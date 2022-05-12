@@ -1,6 +1,7 @@
 package pcd02.lib;
 
 import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Observer;
 import pcd02.interfaces.*;
 
 import java.io.FileNotFoundException;
@@ -49,5 +50,5 @@ public interface ProjectAnalyzer {
 	 * 
 	 * @param srcProjectFolderName The path of the folder of the project.
 	 */
-	void analyzeProject(String srcProjectFolderName);
+	void analyzeProject(String srcProjectFolderName, Observer<ProjectElem> observer);
 }

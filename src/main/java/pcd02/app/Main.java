@@ -8,9 +8,8 @@ public class Main {
 
     public static void main(String[] args) {
         PublishSubject<String> clickStream = PublishSubject.create();
-
-        Controller controller = new Controller(clickStream);
         View view = new View(clickStream);
+        Controller controller = new Controller(view, clickStream);
         view.start();
     }
 }
