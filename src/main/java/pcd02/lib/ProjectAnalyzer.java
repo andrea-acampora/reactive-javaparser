@@ -48,7 +48,6 @@ public interface ProjectAnalyzer {
 	 * executing the callback each time a project element is found 
 	 * 
 	 * @param srcProjectFolderName The path of the folder of the project.
-	 * @param topicAddress The address of the topic.
 	 */
 	void analyzeProject(String srcProjectFolderName);
 }

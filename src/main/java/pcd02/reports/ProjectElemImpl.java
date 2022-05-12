@@ -6,7 +6,6 @@ public class ProjectElemImpl implements ProjectElem {
 
     private ElemType type;
 
-
     @Override
     public ElemType getType() {
         return type;

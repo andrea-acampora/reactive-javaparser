@@ -1,15 +1,17 @@
 package pcd02.controller;
 
-import io.reactivex.rxjava3.core.Scheduler;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.reactivex.rxjava3.subjects.PublishSubject;
+import org.reactivestreams.Subscriber;
+import pcd02.interfaces.ProjectElem;
 import pcd02.lib.ProjectAnalyzer;
 import pcd02.lib.ProjectAnalyzerImpl;
 
-public class Controller{
+public class Controller {
 
     private final ProjectAnalyzer lib;
     private final PublishSubject<String> clickStream;
+    private Subscriber<ProjectElem> subscriber;
 
     public Controller(PublishSubject<String> clickStream) {
         this.lib = new ProjectAnalyzerImpl();
@@ -18,19 +20,16 @@ public class Controller{
             .subscribe((res) -> {
                 if(res.equals("stop")){
                     this.stop();
-                }else{
+                }else {
                     this.start(res);
                 }
         });
     }
 
     private void stop() {
-        System.out.println("STOP " + Thread.currentThread());
     }
 
     private void start(String res) {
-        System.out.println("START " + Thread.currentThread());
         lib.analyzeProject(res);
     }
-
 }

@@ -6,6 +6,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
+import io.reactivex.rxjava3.core.ObservableEmitter;
 import pcd02.interfaces.ProjectElem;
 import pcd02.reports.ElemType;
 import pcd02.reports.ProjectElemImpl;
@@ -13,74 +14,52 @@ import pcd02.reports.ProjectElemImpl;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ProjectVisitor extends VoidVisitorAdapter<Void> {
+public class ProjectVisitor extends VoidVisitorAdapter<ObservableEmitter<ProjectElem>> {
 
-//    private final Set<String> packages;
+    private final Set<String> packages;
 
-//    public ProjectVisitor(Vertx vertx, String topicAddress) {
-//        this.vertx = vertx;
-//        this.topicAddress = topicAddress;
-//        this.packages = new HashSet<>();
-//    }
-//
-//
-//    public void visit(CompilationUnit cu, Void collector) {
-//        log("visiting compilation unit");
-//        this.vertx.executeBlocking(promise -> super.visit(cu, collector));
-//        log("after visiting compilation unit");
-//    }
-//
-//    // PACKAGE DECLARATION VISIT USING EXECUTE_BLOCKING AND PROJECT ELEM
-//    public void visit(PackageDeclaration pd, Void collector) {
-//        log("visiting package declaration");
-//        Future<ProjectElem> fut = this.vertx.executeBlocking(promise -> {
-//            super.visit(pd, collector);
-//            ProjectElem projectElem = new ProjectElemImpl();
-//            projectElem.setType(ElemType.PACKAGE);
-//            promise.complete(projectElem);
-//        });
-//        fut.onSuccess(res -> {
-//            if (this.packages.add(pd.getNameAsString())) {
-//                this.vertx.eventBus().publish(topicAddress, res.getType().toString());
-//            }
-//        });
-//        log("after visiting package declaration");
-//    }
-//
-//    public void visit(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, Void collector) {
-//        Future<ProjectElem> fut = this.vertx.executeBlocking(promise -> {
-//            super.visit(classOrInterfaceDeclaration, collector);
-//            ProjectElem projectElem = new ProjectElemImpl();
-//            if (classOrInterfaceDeclaration.isInterface()) {
-//                projectElem.setType(ElemType.INTERFACE);
-//            } else {
-//                projectElem.setType(ElemType.CLASS);
-//            }
-//            promise.complete(projectElem);
-//        });
-//        fut.onSuccess(res -> this.vertx.eventBus().publish(topicAddress, res.getType().toString()));
-//    }
-//
-//    public void visit(MethodDeclaration md, Void collector) {
-//        Future<ProjectElem> fut = this.vertx.executeBlocking(promise -> {
-//            super.visit(md, collector);
-//            ProjectElem projectElem = new ProjectElemImpl();
-//            projectElem.setType(ElemType.METHOD);
-//            promise.complete(projectElem);
-//        });
-//        fut.onSuccess(res -> this.vertx.eventBus().publish(topicAddress, res.getType().toString()));
-//
-//    }
-//
-//    public void visit(FieldDeclaration fd, Void collector) {
-//        Future<ProjectElem> fut = this.vertx.executeBlocking(promise -> {
-//            super.visit(fd, collector);
-//            ProjectElem projectElem = new ProjectElemImpl();
-//            projectElem.setType(ElemType.FIELD);
-//            promise.complete(projectElem);
-//        });
-//        fut.onSuccess(res -> this.vertx.eventBus().publish(topicAddress, res.getType().toString()));
-//    }
+    public ProjectVisitor() {
+        this.packages = new HashSet<>();
+    }
+
+
+    public void visit(CompilationUnit cu,  ObservableEmitter<ProjectElem> emitter) {
+        super.visit(cu, emitter);
+    }
+
+    public void visit(PackageDeclaration pd, ObservableEmitter<ProjectElem> emitter) {
+        super.visit(pd, emitter);
+        if (packages.add(pd.getNameAsString())) {
+            ProjectElem projectElem = new ProjectElemImpl();
+            projectElem.setType(ElemType.PACKAGE);
+            emitter.onNext(projectElem);
+        }
+    }
+
+    public void visit(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, ObservableEmitter<ProjectElem> emitter) {
+            super.visit(classOrInterfaceDeclaration, emitter);
+            ProjectElem projectElem = new ProjectElemImpl();
+            if (classOrInterfaceDeclaration.isInterface()) {
+                projectElem.setType(ElemType.INTERFACE);
+            } else {
+                projectElem.setType(ElemType.CLASS);
+            }
+            emitter.onNext(projectElem);
+    }
+
+    public void visit(MethodDeclaration md, ObservableEmitter<ProjectElem> emitter) {
+            super.visit(md, emitter);
+            ProjectElem projectElem = new ProjectElemImpl();
+            projectElem.setType(ElemType.METHOD);
+            emitter.onNext(projectElem);
+    }
+
+    public void visit(FieldDeclaration fd, ObservableEmitter<ProjectElem> emitter) {
+            super.visit(fd, emitter);
+            ProjectElem projectElem = new ProjectElemImpl();
+            projectElem.setType(ElemType.FIELD);
+            emitter.onNext(projectElem);
+    }
 
     private void log(String message) {
         System.out.println("[ Thread: " + Thread.currentThread().getName() + " ]" + ": " + message);

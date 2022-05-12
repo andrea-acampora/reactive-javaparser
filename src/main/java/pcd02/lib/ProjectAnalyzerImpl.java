@@ -4,14 +4,13 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.SourceRoot;
 import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Observable;
 import pcd02.interfaces.*;
-import pcd02.reports.ClassReportImpl;
-import pcd02.reports.InterfaceReportImpl;
-import pcd02.reports.PackageReportImpl;
-import pcd02.reports.ProjectReportImpl;
+import pcd02.reports.*;
 import pcd02.visitors.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -92,6 +91,15 @@ public class ProjectAnalyzerImpl implements ProjectAnalyzer {
 
     @Override
     public void analyzeProject(String srcProjectFolderName) {
-        System.out.println("src = " + srcProjectFolderName);
+        SourceRoot sourceRoot = new SourceRoot(Paths.get(srcProjectFolderName));
+        try {
+            sourceRoot.tryToParse();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        List<CompilationUnit> compilationUnits = sourceRoot.getCompilationUnits();
+        ProjectVisitor projectVisitor = new ProjectVisitor();
+        Observable<ProjectElem> source = Observable.create(emitter -> compilationUnits.forEach(cu -> projectVisitor.visit(cu, emitter)));
+        source.subscribe(element -> System.out.println("Project element: " + element.getType()));
     }
 }
