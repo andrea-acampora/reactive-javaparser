@@ -5,18 +5,15 @@ import pcd02.interfaces.ProjectElem;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.util.LinkedList;
-import java.util.List;
+
 import javax.swing.*;
 
 public class ProjectAnalyzerGUI {
 
     private final VisualiserFrame frame;
-    private final PublishSubject<String> clickStream;
 
     public ProjectAnalyzerGUI(PublishSubject<String> clickStream){
         this.frame = new VisualiserFrame(300, 300, clickStream);
-        this.clickStream = clickStream;
     }
 
     public void start() {

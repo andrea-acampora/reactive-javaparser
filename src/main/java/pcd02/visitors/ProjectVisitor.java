@@ -7,7 +7,6 @@ import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import io.reactivex.rxjava3.core.FlowableEmitter;
-import io.reactivex.rxjava3.core.ObservableEmitter;
 import pcd02.interfaces.ProjectElem;
 import pcd02.reports.ElemType;
 import pcd02.reports.ProjectElemImpl;

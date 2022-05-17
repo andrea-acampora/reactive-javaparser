@@ -1,11 +1,8 @@
 package pcd02.controller;
 
-import io.reactivex.rxjava3.annotations.NonNull;
-import io.reactivex.rxjava3.core.Observer;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.reactivex.rxjava3.subjects.PublishSubject;
-import pcd02.interfaces.ProjectElem;
 import pcd02.lib.ProjectAnalyzer;
 import pcd02.lib.ProjectAnalyzerImpl;
 import pcd02.view.View;
@@ -14,7 +11,6 @@ public class Controller {
 
     private final ProjectAnalyzer lib;
     private final PublishSubject<String> clickStream;
-    //private final MyObserver observer;
     private final View view;
     private Disposable disposable;
 
@@ -38,9 +34,13 @@ public class Controller {
     }
 
     private void start(String res) {
-        disposable = lib.analyzeProject(res).subscribeOn(Schedulers.computation()).subscribe(r -> {
-            view.notifyElement(r);
-            System.out.println("r = " + r);
+        disposable = lib.analyzeProject(res)
+                .onBackpressureBuffer(10_000, () -> {
+                    System.out.println("Observable too fast !");
+                    this.disposable.dispose();
+                })
+                .subscribeOn(Schedulers.computation()).subscribe(r -> {
+                view.notifyElement(r);
         });
     }
 }

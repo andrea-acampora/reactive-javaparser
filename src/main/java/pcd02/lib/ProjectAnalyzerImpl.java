@@ -5,8 +5,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.SourceRoot;
 import io.reactivex.rxjava3.core.BackpressureStrategy;
 import io.reactivex.rxjava3.core.Flowable;
-import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.flowables.ConnectableFlowable;
 import pcd02.interfaces.*;
 import pcd02.reports.*;
 import pcd02.visitors.*;
@@ -15,7 +14,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.concurrent.Flow;
 
 public class ProjectAnalyzerImpl implements ProjectAnalyzer {
 
@@ -102,7 +100,9 @@ public class ProjectAnalyzerImpl implements ProjectAnalyzer {
         }
         List<CompilationUnit> compilationUnits = sourceRoot.getCompilationUnits();
         ProjectVisitor projectVisitor = new ProjectVisitor();
-        //source.subscribeWith(observer);
-        return Flowable.create(emitter -> compilationUnits.forEach(cu -> projectVisitor.visit(cu, emitter)), BackpressureStrategy.ERROR);
+        Flowable<ProjectElem> flowable = Flowable.create(emitter -> compilationUnits.forEach(cu -> projectVisitor.visit(cu, emitter)), BackpressureStrategy.BUFFER);
+        ConnectableFlowable<ProjectElem> hotObservable = flowable.publish();
+        hotObservable.connect();
+        return hotObservable;
     }
 }
