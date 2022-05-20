@@ -40,6 +40,7 @@ public class Controller {
                     System.out.println("Observable too fast !");
                     this.disposable.dispose();
                 })
-                .subscribeOn(Schedulers.computation()).subscribe(view::notifyElement);
+                .subscribeOn(Schedulers.computation())
+                .subscribe(view::notifyElement);
     }
 }

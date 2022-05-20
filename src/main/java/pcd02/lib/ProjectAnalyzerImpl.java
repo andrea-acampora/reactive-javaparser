@@ -5,9 +5,6 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.SourceRoot;
 import io.reactivex.rxjava3.core.BackpressureStrategy;
 import io.reactivex.rxjava3.core.Flowable;
-import io.reactivex.rxjava3.flowables.ConnectableFlowable;
-import io.reactivex.rxjava3.functions.Function;
-import org.reactivestreams.Publisher;
 import pcd02.interfaces.*;
 import pcd02.reports.*;
 import pcd02.visitors.*;
@@ -95,12 +92,15 @@ public class ProjectAnalyzerImpl implements ProjectAnalyzer {
 
     @Override
     public Flowable<ProjectElem> analyzeProject(String srcProjectFolderName) throws IOException {
-        ProjectVisitor projectVisitor = new ProjectVisitor();
         return Flowable.fromIterable(new SourceRoot(Paths.get(srcProjectFolderName))
-                .tryToParse().stream().map(a -> a.getResult().get())
-                .collect(Collectors.toList()))
-                .flatMap((Function<CompilationUnit, Flowable<ProjectElem>>)
-                        compilationUnit -> Flowable.create(emitter ->
-                                projectVisitor.visit(compilationUnit, emitter), BackpressureStrategy.BUFFER));
+                        .tryToParse()
+                        .stream()
+                        .map(cu -> cu.getResult().get())
+                        .collect(Collectors.toList()))
+                        .flatMap( compilationUnit -> Flowable.create(emitter -> {
+                            ProjectVisitor projectVisitor = new ProjectVisitor();
+                            projectVisitor.visit(compilationUnit, emitter);
+                            emitter.onComplete();
+                        }, BackpressureStrategy.BUFFER));
     }
 }
