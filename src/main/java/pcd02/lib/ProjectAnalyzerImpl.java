@@ -92,13 +92,13 @@ public class ProjectAnalyzerImpl implements ProjectAnalyzer {
 
     @Override
     public Flowable<ProjectElem> analyzeProject(String srcProjectFolderName) throws IOException {
+        ProjectVisitor projectVisitor = new ProjectVisitor();
         return Flowable.fromIterable(new SourceRoot(Paths.get(srcProjectFolderName))
                         .tryToParse()
                         .stream()
                         .map(cu -> cu.getResult().get())
                         .collect(Collectors.toList()))
                         .flatMap( compilationUnit -> Flowable.create(emitter -> {
-                            ProjectVisitor projectVisitor = new ProjectVisitor();
                             projectVisitor.visit(compilationUnit, emitter);
                             emitter.onComplete();
                         }, BackpressureStrategy.BUFFER));
