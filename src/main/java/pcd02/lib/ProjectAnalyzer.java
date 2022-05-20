@@ -4,6 +4,7 @@ import io.reactivex.rxjava3.core.Flowable;
 import pcd02.interfaces.*;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public interface ProjectAnalyzer {
 
@@ -49,5 +50,5 @@ public interface ProjectAnalyzer {
 	 * 
 	 * @param srcProjectFolderName The path of the folder of the project.
 	 */
-	Flowable<ProjectElem> analyzeProject(String srcProjectFolderName);
+	Flowable<ProjectElem> analyzeProject(String srcProjectFolderName) throws IOException;
 }

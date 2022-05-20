@@ -7,6 +7,8 @@ import pcd02.lib.ProjectAnalyzer;
 import pcd02.lib.ProjectAnalyzerImpl;
 import pcd02.view.View;
 
+import java.io.IOException;
+
 public class Controller {
 
     private final ProjectAnalyzer lib;
@@ -29,11 +31,10 @@ public class Controller {
     }
 
     private void stop() {
-        System.out.println("STOP");
         disposable.dispose();
     }
 
-    private void start(String res) {
+    private void start(String res) throws IOException {
         disposable = lib.analyzeProject(res)
                 .onBackpressureBuffer(10_000, () -> {
                     System.out.println("Observable too fast !");

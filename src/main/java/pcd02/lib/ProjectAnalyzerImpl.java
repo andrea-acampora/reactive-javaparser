@@ -6,6 +6,8 @@ import com.github.javaparser.utils.SourceRoot;
 import io.reactivex.rxjava3.core.BackpressureStrategy;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.flowables.ConnectableFlowable;
+import io.reactivex.rxjava3.functions.Function;
+import org.reactivestreams.Publisher;
 import pcd02.interfaces.*;
 import pcd02.reports.*;
 import pcd02.visitors.*;
@@ -14,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ProjectAnalyzerImpl implements ProjectAnalyzer {
 
@@ -91,18 +94,13 @@ public class ProjectAnalyzerImpl implements ProjectAnalyzer {
     }
 
     @Override
-    public Flowable<ProjectElem> analyzeProject(String srcProjectFolderName) {
-        SourceRoot sourceRoot = new SourceRoot(Paths.get(srcProjectFolderName));
-        try {
-            sourceRoot.tryToParse();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        List<CompilationUnit> compilationUnits = sourceRoot.getCompilationUnits();
+    public Flowable<ProjectElem> analyzeProject(String srcProjectFolderName) throws IOException {
         ProjectVisitor projectVisitor = new ProjectVisitor();
-        Flowable<ProjectElem> flowable = Flowable.create(emitter -> compilationUnits.forEach(cu -> projectVisitor.visit(cu, emitter)), BackpressureStrategy.BUFFER);
-        ConnectableFlowable<ProjectElem> hotObservable = flowable.publish();
-        hotObservable.connect();
-        return hotObservable;
+        return Flowable.fromIterable(new SourceRoot(Paths.get(srcProjectFolderName))
+                .tryToParse().stream().map(a -> a.getResult().get())
+                .collect(Collectors.toList()))
+                .flatMap((Function<CompilationUnit, Flowable<ProjectElem>>)
+                        compilationUnit -> Flowable.create(emitter ->
+                                projectVisitor.visit(compilationUnit, emitter), BackpressureStrategy.BUFFER));
     }
 }
