@@ -10,6 +10,7 @@ public class Main {
         PublishSubject<String> clickStream = PublishSubject.create();
         View view = new View(clickStream);
         Controller controller = new Controller(view, clickStream);
+        controller.init();
         view.start();
     }
 }

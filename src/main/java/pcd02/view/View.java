@@ -20,4 +20,8 @@ public class View {
     public void notifyElement(ProjectElem projectElem) {
         this.gui.notifyElement(projectElem);
     }
+
+    public void resetCounter(){
+
+    }
 }

@@ -16,6 +16,10 @@ public class ProjectAnalyzerGUI {
         this.frame = new VisualiserFrame(300, 300, clickStream);
     }
 
+    public void resetCounter(){
+
+    }
+
     public void start() {
         SwingUtilities.invokeLater(this.frame::start);
     }
@@ -74,7 +78,6 @@ public class ProjectAnalyzerGUI {
             stopButton.addActionListener((ActionEvent ev) -> {
                 this.clickStream.onNext("stop");
                 this.stopButton.setEnabled(false);
-                this.startButton.setEnabled(true);
             });
 
 

@@ -15,32 +15,43 @@ public class Controller {
     private final PublishSubject<String> clickStream;
     private final View view;
     private Disposable disposable;
+    private Disposable clickDisposable;
 
     public Controller(View view, PublishSubject<String> clickStream) {
         this.lib = new ProjectAnalyzerImpl();
         this.view = view;
         this.clickStream = clickStream;
-        this.clickStream.observeOn(Schedulers.computation())
-            .subscribe((res) -> {
-                if(res.equals("stop")){
-                    this.stop();
-                }else {
-                    this.start(res);
-                }
-        });
     }
 
     private void stop() {
         disposable.dispose();
+        clickDisposable.dispose();
     }
 
     private void start(String res) throws IOException {
-        disposable = lib.analyzeProject(res)
+        this.disposable = lib.analyzeProject(res)
                 .onBackpressureBuffer(10_000, () -> {
                     System.out.println("Observable too fast !");
                     this.disposable.dispose();
                 })
                 .subscribeOn(Schedulers.computation())
                 .subscribe(view::notifyElement);
+       this.registerOnButtonClick();
+    }
+
+    public void init(){
+        this.registerOnButtonClick();
+    }
+
+    public void registerOnButtonClick(){
+        this.clickDisposable = this.clickStream
+                .observeOn(Schedulers.computation())
+                .subscribe((res) -> {
+                    if(res.equals("stop")){
+                        this.stop();
+                    }else {
+                        this.start(res);
+                    }
+                });
     }
 }
